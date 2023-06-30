@@ -50,6 +50,9 @@ class Interacter:
 
   async def ConnectToFigula(self):
     self.vc = await self.master_vc.channel.connect()
+
+  async def PlaySound(self, filename: str):
+    self.vc.play(discord.FFmpegPCMAudio(filename))
   
   async def Disconnect(self):
     await self.vc.disconnect()
