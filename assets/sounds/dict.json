@@ -1,4 +1,10 @@
 {
-  "NumPad1" : "roffles.ogg",
-  "NumPad2" : "pipe.mp3"
+  "97" : "roffles.ogg",
+  "98" : "pipe.mp3",
+  "99" : "pelmeni.mp3",
+  "100" : "vineboom.mp3",
+  "101" : "tututututu.mp3",
+  "102" : "discord-leave.mp3",
+  "103" : "discord-join.mp3",
+  "start" : "acolyte.mp3"
 }
