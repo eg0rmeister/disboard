@@ -13,7 +13,7 @@ class Interacter:
   master_vc = None
   vc = None
 
-  async def Update(self):
+  async def Connect(self):
 
     # Load and assign environment variables
     dotenv.load_dotenv()
@@ -28,7 +28,10 @@ class Interacter:
     @self.client.event
     async def on_ready():
       self.online = True
-      # await self.client.close()
+    
+    @self.client.event
+    async def on_voice_state_update(member : discord.Member, before : discord.VoiceState, after : discord.VoiceState):
+      print('\a')
 
     await self.client.login(token)
     self.main_task = asyncio.ensure_future(self.client.connect(reconnect=False))
@@ -52,7 +55,13 @@ class Interacter:
     self.vc = await self.master_vc.channel.connect()
 
   async def PlaySound(self, filename: str):
-    self.vc.play(discord.FFmpegPCMAudio(filename))
+    
+    if (not self.vc.is_connected()):
+      await self.ConnectToFigula()
+    if (self.vc.is_playing()):
+      self.vc.stop()
+    print(filename)
+    self.vc.play(discord.FFmpegPCMAudio(filename, executable="C:\\Users\\egor\\Documents\\Essentials\\ffmpeg\\bin\\ffmpeg.exe"))
   
   async def Disconnect(self):
     await self.vc.disconnect()
