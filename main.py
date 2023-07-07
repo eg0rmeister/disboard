@@ -2,6 +2,7 @@ import src.bot_manager as bm
 import src.sound_manager as sm
 import asyncio
 from pynput import keyboard
+import random
 
 class Callback:
   button = None
@@ -11,49 +12,39 @@ class Callback:
       key = key.value
     self.button = str(key.vk)
 
+async def PlayRandom(discord_manager : bm.Interacter, sound_manager : sm.Sounder):
+  if (not await discord_manager.ConnectToRandom()):
+    return
+  await discord_manager.PlaySound(sound_manager.GetRandomSound())
+  await discord_manager.Disconnect()
+
+async def SayHello(discord_manager : bm.Interacter, sound_manager : sm.Sounder):
+  if (discord_manager.member_changed is not None):
+    filename = sound_manager.CreateTTS("Шалом, " + discord_manager.member_changed.display_name)
+    print("Шалом, " + discord_manager.member_changed.display_name)
+    await discord_manager.ConnectTo(discord_manager.member_changed)
+    await discord_manager.PlaySound(filename)
+    await discord_manager.Disconnect()
+    discord_manager.member_changed = None
+
 async def main():
   sound_manager = sm.Sounder()
   discord_manager = bm.Interacter()
   await discord_manager.Connect()
+  print("DEBUG")
   print("Established connection")
   discord_manager.FindFigula()
-  print("Found Master")
-  await discord_manager.SendMessage()
-  await discord_manager.ConnectToFigula()
-  print("Connected to master")
-  try:
-    callback = Callback()
-    # keyboard.hook(callback)
-    # await discord_manager.PlaySound(sound_manager.GetSound('start'))
-
-    listener = keyboard.Listener(on_press=callback)
-    listener.start()
-    while True:
-      
-      if (callback.button is not None):
-        print(callback.button)
-        if (sound_manager.Contains(callback.button)):
-          await discord_manager.PlaySound(sound_manager.GetSound(callback.button))
-        callback.button = None
-      await asyncio.sleep(0.1)
-  except Exception as traceback:
-    print(type(traceback), traceback)
-    await discord_manager.Disconnect()
-  except:
-    await discord_manager.Disconnect()
+  print("Found My Master")
+  while True:
+    time_until_sfx = random.randint(10, 1200)
+    print("eleven :", sound_manager.GetEleven())
+    await PlayRandom(discord_manager, sound_manager)
+    for _ in range(time_until_sfx):
+      await SayHello(discord_manager, sound_manager)
+      await asyncio.sleep(1)
     
-'''
-  Keyboard Keys Lookup
-  Numpad 1 = 97
-  Numpad 2 = 98
-  Numpad 3 = 99
-  Numpad 4 = 100
-  Numpad 5 = 101
-  Numpad 6 = 102
-  Numpad 7 = 103
-  Numpad 8 = 104
-  Numpad 9 = 105
-'''
+    
+
 
 
 asyncio.run(main())

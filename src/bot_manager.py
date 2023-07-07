@@ -4,14 +4,17 @@ import os
 import discord
 import dotenv
 import asyncio
+import random
+
+from collections.abc import Sequence
 
 class Interacter:
-  client = None
-  online = False
-  master_id = None
-  main_task = None
+  client : discord.Client = None
+  online : bool = False
+  master_id : int = None
   master_vc = None
   vc = None
+  member_changed : discord.Member = None
 
   async def Connect(self):
 
@@ -31,10 +34,15 @@ class Interacter:
     
     @self.client.event
     async def on_voice_state_update(member : discord.Member, before : discord.VoiceState, after : discord.VoiceState):
-      print('\a')
+      if (before.channel != after.channel and after.channel is not None and member.id != self.client.user.id):
+        # print(after)
+        print("__")
+        print(member)
+        print("--")
+        self.member_changed = member
 
     await self.client.login(token)
-    self.main_task = asyncio.ensure_future(self.client.connect(reconnect=False))
+    asyncio.create_task(self.client.connect(reconnect=False))
     while (not self.online):
       await asyncio.sleep(0.5)
 
@@ -45,23 +53,35 @@ class Interacter:
     return
   
   def FindFigula(self):
-    for guild in self.client.guilds:
-      for member in guild.members:
-        if (member.id == self.master_id and member.voice is not None):
-          self.master_vc = member.voice
-          return
+    for member in self.client.get_all_members():
+      if (member.id == self.master_id and member.voice is not None):
+        self.master_vc = member.voice.channel
+        return
 
-  async def ConnectToFigula(self):
-    self.vc = await self.master_vc.channel.connect()
+  async def ConnectToMaster(self):
+    self.vc = await self.master_vc.connect()
+
+  async def ConnectTo(self, member : discord.Member):
+    self.vc = await member.voice.channel.connect()
 
   async def PlaySound(self, filename: str):
-    
-    if (not self.vc.is_connected()):
-      await self.ConnectToFigula()
     if (self.vc.is_playing()):
       self.vc.stop()
     print(filename)
     self.vc.play(discord.FFmpegPCMAudio(filename, executable="C:\\Users\\egor\\Documents\\Essentials\\ffmpeg\\bin\\ffmpeg.exe"))
+    while (self.vc.is_playing()):
+      await asyncio.sleep(0.1)
   
   async def Disconnect(self):
     await self.vc.disconnect()
+
+  async def ConnectToRandom(self):
+    channels = set()
+    for member in self.client.get_all_members():
+      if (member.voice is not None):
+        channels.add(member.voice.channel)
+    if (len(channels) == 0):
+      return False
+    channel : discord.channel.VocalGuildChannel = random.choice([_ for _ in channels])
+    self.vc = await channel.connect()
+    return True

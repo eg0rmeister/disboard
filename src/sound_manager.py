@@ -1,5 +1,6 @@
 import json
 import pyttsx3
+import random
 
 SOUNDS_DIR = "assets/sounds/"
 SOUNDS_DICT_NAME = "dict.json"
@@ -19,6 +20,7 @@ class Sounder:
       sounds = json.load(file)
     for entry in sounds:
       self.sounds[entry] = SOUNDS_DIR + sounds[entry]
+    print(self.sounds)
 
   def _init_tts(self):
     self.tts_engine = pyttsx3.init()
@@ -28,6 +30,9 @@ class Sounder:
 
   def GetSound(self, name: str):
     return self.sounds[name]
+
+  def GetRandomSound(self):
+    return self.GetSound(random.choice([_ for _ in self.sounds.keys()]))
   
   def Contains(self, name: str):
     return name in self.sounds.keys()
@@ -35,4 +40,8 @@ class Sounder:
   def CreateTTS(self, string: str):
     self.tts_engine.save_to_file(string, TTS_DIR + TTS_FILENAME)
     self.tts_engine.runAndWait()
+    return TTS_DIR + TTS_FILENAME
+  
+  def GetEleven(self):
+    return self.GetSound('eleven')
   
